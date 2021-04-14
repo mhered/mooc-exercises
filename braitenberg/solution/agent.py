@@ -23,9 +23,17 @@ import duckietown_code_utils as dcu
 from connections import get_motor_left_matrix, get_motor_right_matrix
 from preprocessing import preprocess
 
+# MH added for BRAKES
+from connections import get_brake_matrix
+
 
 @dataclass
 class BraitenbergAgentConfig:
+    # MH this assignment does not work
+    # Regardless of values it defaults to gain = 0.2 const = 0.4
+    # recognized as a bug
+    # overriden below in function compute_commands()
+
     gain: float = 0.1
     const: float = 0.1
 
@@ -41,6 +49,11 @@ class BraitenbergAgent:
     l_min: float
     r_min: float
 
+    # MH added for BRAKES
+    b_min: float
+    b_min: float
+    brake: Optional[np.ndarray]
+
     def init(self, context: Context):
         context.info("init()")
         self.rgb = None
@@ -50,6 +63,11 @@ class BraitenbergAgent:
         self.r_min = math.inf
         self.left = None
         self.right = None
+
+        # MH added for BRAKES
+        self.b_max = -math.inf
+        self.b_min = math.inf
+        self.brake = None
 
     def on_received_seed(self, data: int):
         np.random.seed(data)
@@ -75,11 +93,22 @@ class BraitenbergAgent:
             self.left = get_motor_left_matrix(shape)
             self.right = get_motor_right_matrix(shape)
 
+            # MH added for BRAKES
+            self.brake = get_brake_matrix(shape)
+
         # let's take only the intensity of RGB
         P = preprocess(self.rgb)
+
         # now we just compute the activation of our sensors
         l = float(np.sum(P * self.left))
         r = float(np.sum(P * self.right))
+
+        # MH added for BRAKES
+        b = float(np.sum(P * self.brake))
+
+        # MH for debug
+        # print("L: ", l, "R: ", r, "\n") # MH works but really slow
+        # context.info(msg) # MH does not work, function does not receive Context
 
         # These are big numbers -- we want to normalize them.
         # We normalize them using the history
@@ -90,14 +119,39 @@ class BraitenbergAgent:
         self.l_min = min(l, self.l_min)
         self.r_min = min(r, self.r_min)
 
+        self.b_max = max(b, self.b_max)
+        self.b_min = min(b, self.b_min)
+
         # now rescale from 0 to 1
         ls = rescale(l, self.l_min, self.l_max)
         rs = rescale(r, self.r_min, self.r_max)
 
-        gain = self.config.gain
-        const = self.config.const
+        bs = rescale(b, self.b_min, self.b_max)
+
+        # MH this does not work. Recognized as a bug. Deactivated.
+        # gain = self.config.gain
+        # const = self.config.const
+
+        # MH overriding the assignemnt deactivated above
+        # for FEAR & WEIGHTED
+        gain = 0.2
+        const = 0.2
+
+        # for EXPLORER
+        # gain = -0.1
+        # const = 0.4
+
         pwm_left = const + ls * gain
         pwm_right = const + rs * gain
+
+        # MH added for BRAKES
+        pwm_left = pwm_left - bs * const
+        pwm_right = pwm_right - bs * const
+
+        # MH for debug
+        # print("gain: ", gain, "CONST: ", const, "\n")
+        # print("L: ", ls, " PWM_LEFT: ", pwm_left, " R: ", rs,
+        #       " PWM_RIGHT: ", pwm_right, "\n")
 
         return pwm_left, pwm_right
 

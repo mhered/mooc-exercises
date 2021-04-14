@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-# MH - works on manyducks and simu, not on bigduck
+# MH - works on manyducks and simu, not so well on bigduck
 lower_hsv = np.array([0, 100, 0])
 upper_hsv = np.array([60, 255, 255])
 
