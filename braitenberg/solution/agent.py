@@ -134,8 +134,8 @@ class BraitenbergAgent:
 
         # MH overriding the assignemnt deactivated above
         # for FEAR & WEIGHTED
-        gain = 0.15
-        const = 0.15
+        gain = 0.16
+        const = 0.14
 
         # for EXPLORER
         # gain = -0.1
