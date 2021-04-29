@@ -26,7 +26,6 @@ def DeltaPhi(encoder_msg, prev_ticks):
 
     return delta_phi, ticks
 
-
 # In[ ]:
 
 
@@ -59,4 +58,3 @@ def poseEstimation( R, # radius of wheel (assumed identical) - this is fixed in 
     theta_curr = np.random.random() 
 
     return x_curr, y_curr, theta_curr
-

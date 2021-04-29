@@ -36,4 +36,3 @@ def PIDController(v_0, theta_ref, theta_hat, prev_e, prev_int, delta_t):
     e_int = np.random.random()
     
     return [v_0, omega], e, e_int
-
