@@ -84,7 +84,8 @@ class EncoderPoseNode(DTROS):
 
         # Wheel encoder subscriber:
         right_encoder_topic = f"/{self.veh}/right_wheel_encoder_node/tick"
-        rospy.Subscriber(right_encoder_topic, WheelEncoderStamped, self.cbRightEncoder, queue_size=1)
+        rospy.Subscriber(right_encoder_topic, WheelEncoderStamped,
+                         self.cbRightEncoder, queue_size=1)
 
         # # AIDO challenge payload subscriber
         episode_start_topic = f"/{self.veh}/episode_start"
@@ -137,7 +138,6 @@ class EncoderPoseNode(DTROS):
         # inside VNC
         # reference y for PID lateral control activity - zero so can be set interactively at runtime
         self.y_ref = 0.0
-
 
     def cbEpisodeStart(self, msg: EpisodeStart):
         loaded = yaml.load(msg.other_payload_yaml, Loader=yaml.FullLoader)
@@ -217,7 +217,8 @@ class EncoderPoseNode(DTROS):
             return
 
         # running the DeltaPhi() function copied from the notebooks to calculate rotations
-        delta_phi_left, self.left_tick_prev = odometry_activity.DeltaPhi(encoder_msg, self.left_tick_prev)
+        delta_phi_left, self.left_tick_prev = odometry_activity.DeltaPhi(
+            encoder_msg, self.left_tick_prev)
         self.delta_phi_left += delta_phi_left
 
         # compute the new pose
@@ -240,7 +241,8 @@ class EncoderPoseNode(DTROS):
             return
 
         # calculate rotation of right wheel
-        delta_phi_right, self.right_tick_prev = odometry_activity.DeltaPhi(encoder_msg, self.right_tick_prev)
+        delta_phi_right, self.right_tick_prev = odometry_activity.DeltaPhi(
+            encoder_msg, self.right_tick_prev)
         self.delta_phi_right += delta_phi_right
 
         # compute the new pose
@@ -275,12 +277,14 @@ class EncoderPoseNode(DTROS):
         # self.loging to screen for debugging purposes
         self.log("              ODOMETRY             ")
         # self.log(f"Baseline : {self.baseline}   R: {self.R}")
-        self.log(f"Theta : {np.rad2deg(self.theta_curr)} deg,  x: {self.x_curr} m,  y: {self.y_curr} m")
+        self.log(
+            f"Theta : {np.rad2deg(self.theta_curr)} deg,  x: {self.x_curr} m,  y: {self.y_curr} m")
         self.log(
             f"Rotation left wheel : {np.rad2deg(self.delta_phi_left)} deg,   Rotation right wheel : "
             f"{np.rad2deg(self.delta_phi_right)} deg"
         )
-        self.log(f"Prev Ticks left : {self.left_tick_prev}   Prev Ticks right : {self.right_tick_prev}")
+        self.log(
+            f"Prev Ticks left : {self.left_tick_prev}   Prev Ticks right : {self.right_tick_prev}")
         # self.log(
         #     f"Prev integral error : {self.prev_int}")
 
@@ -363,7 +367,7 @@ class EncoderPoseNode(DTROS):
     def read_params_from_calibration_file(self):
         """
         Reads the saved parameters from `/data/config/calibrations/kinematics/DUCKIEBOTNAME.yaml`
-        or uses the default values if the file doesn't exist. Adjsuts the ROS paramaters for the
+        or uses the default values if the file doesn't exist. Adjusts the ROS paramaters for the
         node with the new values.
         """
         # Check file existence
